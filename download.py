@@ -2,6 +2,7 @@
 
 import requests
 from const_value import xueqiu_cookie, lrb_API
+from index import index
 
 headers = {
     'User-Agent': 'Mozilla/5.0',
@@ -26,4 +27,17 @@ def download_lrb(code):
         return None
 
 if __name__ == '__main__':
-    download_lrb('SH601088')
+    input = raw_input('> ')
+    code = input
+    index = index()
+    for item in index.keys():
+        if input == item:
+            code = index[item]
+    if code[0] == '6':
+        code = 'SH' + code
+        download_lrb(code)
+    elif code[0] in ['0', '3']:
+        code = 'SZ' + code
+        download_lrb(code)
+    else:
+        print("没有这只股票。")
