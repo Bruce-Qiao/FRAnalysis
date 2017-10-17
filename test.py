@@ -10,17 +10,10 @@ def quote(code):
     try:
         r = requests.get(quote_API,
                         params={'code': code},
-                        #headers=headers,
+                        headers=headers,
                         timeout=5)
-        quote['name'] = r.json()[code]['name']
-        quote['price'] = r.json()[code]['current']
-        quote['eps'] = r.json()[code]['eps']
-        quote['pe_ttm'] = r.json()[code]['pe_ttm']
-        quote['dividend'] = r.json()[code]['dividend']
-        quote['net_assets'] = r.json()[code]['net_assets']
-        quote['time'] = r.json()[code]['time']
 
-        return quote
+        print(r)
     except requests.exceptions:
         return ValueError
 

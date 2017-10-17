@@ -12,10 +12,10 @@ def index():
     for x in re.finditer(expr, content):
         index[x.groups()[1]] = x.groups()[0]
 
-    return index
+    with open('./data/stocks.py', 'wb') as stocks:
+        for item in index.keys():
+            stocks.write(("\'" + "%s" + "\'" + ": " + "\'" + "%s" + "\'" + "," + "\n") %(item, index[item]))
 
 # test
 if __name__ == '__main__':
-    list = index()
-    print(list.keys())
-    print(list['长江电力'])
+    index()

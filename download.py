@@ -3,6 +3,7 @@
 import requests
 from const_value import xueqiu_cookie, lrb_API
 from index import index
+from quote import quote
 
 headers = {
     'User-Agent': 'Mozilla/5.0',
@@ -35,9 +36,9 @@ if __name__ == '__main__':
             code = index[item]
     if code[0] == '6':
         code = 'SH' + code
-        download_lrb(code)
+        quote(code)
     elif code[0] in ['0', '3']:
         code = 'SZ' + code
-        download_lrb(code)
+        quote(code)
     else:
         print("没有这只股票。")

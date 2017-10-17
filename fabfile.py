@@ -2,7 +2,7 @@ from fabric.api import *
 from fabric.contrib.console import confirm
 
 def commit():
-    comment = raw_input("Git comment: ")
+    comment = input("Git comment: ")
     local("git add . && git commit -m \"%s\"" % comment)
 
 def push():
