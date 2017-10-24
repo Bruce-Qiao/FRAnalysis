@@ -2,9 +2,19 @@
 
 import requests
 import pandas as pd
+import matplotlib
+matplotlib.use('agg')
+import matplotlib.pyplot as plt
+import numpy as np
 from const_value import headers, lrb_API, fzb_API, llb_API
 
-def download_lrb(code):
+import sys
+if sys.version_info[0] < 3:
+    from StringIO import StringIO
+else:
+    from io import StringIO
+
+def get_lrb_data(code):
     try:
         r = requests.get(
             lrb_API, params={
@@ -14,55 +24,10 @@ def download_lrb(code):
             },
             headers=headers,
             timeout=5)
-        filename = './data/report/' + code + '_lrb.csv'
-        with open(filename, 'wb') as f:
-            f.write(r.content)
+        csv = StringIO(r.text)
     except requests.exceptions.Timeout:
         return None
-
-def download_fzb(code):
-    try:
-        r = requests.get(
-            fzb_API, params={
-            'page': 1,
-            'size': 10000,
-            'symbol': code,
-            },
-            headers=headers,
-            timeout=5)
-        filename = './data/report/' + code + '_fzb.csv'
-        with open(filename, 'wb') as f:
-            f.write(r.content)
-    except requests.exceptions.Timeout:
-        return None
-
-def download_llb(code):
-    try:
-        r = requests.get(
-            llb_API, params={
-            'page': 1,
-            'size': 10000,
-            'symbol': code,
-            },
-            headers=headers,
-            timeout=5)
-        filename = './data/report/' + code + '_llb.csv'
-        with open(filename, 'wb') as f:
-            f.write(r.content)
-    except requests.exceptions.Timeout:
-        return None
-
-def download_all(code):
-    download_lrb(code)
-    download_fzb(code)
-    download_llb(code)
-    return None
-
-def get_lrb_data(code):
-    lrb = pd.read_csv('./data/report/%s_lrb.csv' % (code),
-                    encoding='utf-8',
-                    header=0,
-                    index_col=None)
+    lrb = pd.read_csv(csv, encoding='utf-8', header=0, index_col=None)
 
     list_lrb = []
     for i in lrb[u'报表期截止日']:
@@ -78,10 +43,19 @@ def get_lrb_data(code):
     return lrb_data
 
 def get_fzb_data(code):
-    fzb = pd.read_csv('./data/report/%s_fzb.csv' % (code),
-                    encoding='utf-8',
-                    header=0,
-                    index_col=None)
+    try:
+        r = requests.get(
+            fzb_API, params={
+            'page': 1,
+            'size': 10000,
+            'symbol': code,
+            },
+            headers=headers,
+            timeout=5)
+        csv = StringIO(r.text)
+    except requests.exceptions.Timeout:
+        return None
+    fzb = pd.read_csv(csv, encoding='utf-8', header=0, index_col=None)
 
     list_fzb = []
     for i in fzb[u'报表日期']:
@@ -97,10 +71,19 @@ def get_fzb_data(code):
     return fzb_data
 
 def get_llb_data(code):
-    llb = pd.read_csv('./data/report/%s_llb.csv' % (code),
-                    encoding='utf-8',
-                    header=0,
-                    index_col=None)
+    try:
+        r = requests.get(
+            llb_API, params={
+            'page': 1,
+            'size': 10000,
+            'symbol': code,
+            },
+            headers=headers,
+            timeout=5)
+        csv = StringIO(r.text)
+    except requests.exceptions.Timeout:
+        return None
+    llb = pd.read_csv(csv, encoding='utf-8', header=0, index_col=None)
 
     list_llb = []
     for i in llb[u'报表期截止日']:
@@ -140,8 +123,22 @@ def get_data_ratio(lrb_data, fzb_data, llb_data):
     result.index = lrb_data['report_time']
     return result
 
+def data_plot(code, data, ratio, kind='bar'):
+    l_0 = len(data)
+    s_0 = list(range(l_0))
+    x_0 = np.array(s_0)
+    y_0 = tuple([str(i) for i in range(2017 - l_0, 2017)])
+
+    data[ratio].plot(kind=kind)
+    plt.title(code)
+    plt.legend([ratio])
+    plt.xticks(x_0, y_0)
+    plt.grid(color='#95a5a6', linestyle='--', linewidth=1, axis='y', alpha=0.4)
+    plt.savefig('./data/pic/%s_%s.jpg' % (code, ratio))
+
+    return './data/pic/%s_%s.jpg' % (code, ratio)
+
 def main(code):
-    download_all(code)
     lrb_data, fzb_data, llb_data = get_all_data(code)
     result = get_data_ratio(lrb_data, fzb_data, llb_data)
     return result
@@ -149,5 +146,5 @@ def main(code):
 if __name__ == '__main__':
     code = 'SH600900'
     report_time = '20161231'
-    result = main(code)
-    print(result.loc[report_time, 'ROE'])
+    result = get_data_month(main(code), 12)
+    print(data_plot(code, result, 'revenue'))
