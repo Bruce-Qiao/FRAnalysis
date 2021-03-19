@@ -9,7 +9,7 @@ Fabric3==1.13.1.post1
 Flask==0.12.2
 idna==2.6
 itsdangerous==0.24
-Jinja2==2.9.6
+Jinja2==2.11.3
 MarkupSafe==1.0
 paramiko==2.3.1
 pyasn1==0.3.7
